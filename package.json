@@ -8,8 +8,9 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
-    "prettier": "^3.2.5",
-    "turbo": "^2.3.3",
+    "@biomejs/biome": "1.9.4",
+    "loro-crdt": "1.1.4",
+    "turbo": "2.3.3",
     "typescript": "5.5.4"
   },
   "packageManager": "pnpm@9.0.0",
