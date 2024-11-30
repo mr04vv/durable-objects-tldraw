@@ -84,28 +84,6 @@ function App() {
         wsProvider.send(message);
         versionRef.current = doc.version();
       }
-      if (e.by === "checkout") {
-        const updateShapes: TLRecord[] = [];
-        const deleteShapeIds: TLShapeId[] = [];
-        const events = e.events;
-        for (const event of events) {
-          if (event.diff.type === "map") {
-            const map = event.diff.updated;
-            for (const key in map) {
-              const shape = map[key] as unknown as TLShape;
-              if (shape === null) {
-                deleteShapeIds.push(key as TLShapeId);
-              } else {
-                updateShapes.push(shape);
-              }
-            }
-          }
-        }
-        editor.store.mergeRemoteChanges(() => {
-          editor.store.put([...updateShapes]);
-          editor.store.remove([...deleteShapeIds]);
-        });
-      }
       if (e.by === "import") {
         const updateShapes: TLRecord[] = [];
         const deleteShapeIds: TLShapeId[] = [];
