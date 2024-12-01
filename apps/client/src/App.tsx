@@ -28,11 +28,10 @@ function App() {
         includeAssetOrShapeString(key),
       );
       if (includeShape) {
-        // biome-ignore lint/complexity/noForEach: <explanation>
-        addedObj.forEach((shape) => {
-          if (!isAssetOrShape(shape?.typeName)) return;
+        for (const shape of addedObj) {
+          if (!isAssetOrShape(shape?.typeName)) continue;
           updateMap(shape);
-        });
+        }
       }
       doc.commit();
     },
@@ -48,12 +47,11 @@ function App() {
         includeAssetOrShapeString(key),
       );
       if (includeShape) {
-        // biome-ignore lint/complexity/noForEach: <explanation>
-        updatedObj.forEach((shape) => {
-          const updatedShape = shape[1];
-          if (!isAssetOrShape(updatedShape?.typeName)) return;
+        for (const shaped of updatedObj) {
+          const updatedShape = shaped[1];
+          if (!isAssetOrShape(updatedShape?.typeName)) continue;
           updateMap(updatedShape);
-        });
+        }
       }
       doc.commit();
     },
@@ -64,10 +62,10 @@ function App() {
     (removed: Record<string, TLRecord>) => {
       const removedObj = Object.values(removed);
       if (!removedObj.length) return;
-      // biome-ignore lint/complexity/noForEach: <explanation>
-      removedObj.forEach((shape) => {
+      for (const shape of removedObj) {
         removeFromMap(shape);
-      });
+      }
+
       doc.commit();
     },
     [doc, removeFromMap],
