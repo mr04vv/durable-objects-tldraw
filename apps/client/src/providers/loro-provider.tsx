@@ -43,6 +43,10 @@ export const LoroProvider = ({ children }: Props) => {
     wsProvider.onerror = (err) => {
       console.log(err);
     };
+
+    return () => {
+      wsProvider.close();
+    };
   }, [wsProvider]);
 
   useEffect(() => {
