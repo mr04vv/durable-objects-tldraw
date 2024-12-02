@@ -140,8 +140,7 @@ function App() {
           awareness.apply(new Uint8Array(message as ArrayBuffer));
           return;
         }
-        const bytes = new Uint8Array(message as ArrayBuffer);
-        doc.import(bytes);
+        doc.import(arrayMessage);
         versionRef.current = doc.version();
       } catch (err) {
         console.error(err);

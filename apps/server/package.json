@@ -1,23 +1,23 @@
 {
   "name": "server",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "version": "0.0.0",
+  "private": true,
   "scripts": {
-    "dev": "tsx watch src/server.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@hono/node-server": "1.13.7",
-    "@hono/node-ws": "1.0.4",
-    "hono": "4.6.12",
-    "ws": "8.18.0"
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev src/index.ts",
+    "start": "wrangler dev",
+    "test": "vitest",
+    "cf-typegen": "wrangler types"
   },
   "devDependencies": {
-    "@types/ws": "8.5.13",
-    "tsx": "4.19.2"
+    "@cloudflare/vitest-pool-workers": "0.5.2",
+    "@cloudflare/workers-types": "4.20241127.0",
+    "typescript": "5.5.2",
+    "vitest": "2.0.5",
+    "wrangler": "3.60.3"
+  },
+  "dependencies": {
+    "hono": "4.6.12",
+    "loro-crdt": "1.1.4"
   }
 }

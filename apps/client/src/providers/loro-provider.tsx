@@ -29,7 +29,7 @@ export const LoroProvider = ({ children }: Props) => {
   const userName =
     new URLSearchParams(location.search).get("userName") || "name";
   const wsProvider = useMemo(() => {
-    return new WebSocket("ws://localhost:1234");
+    return new WebSocket("ws://localhost:8787/ws/hoge");
   }, []);
 
   wsProvider.binaryType = "arraybuffer";
