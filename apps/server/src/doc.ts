@@ -21,7 +21,9 @@ export class Doc extends DurableObject {
     this.ctx.acceptWebSocket(server);
     // 保存された状態からsnapshotを取得
     const doc = await this.ctx.storage.get("doc");
-    server.send(doc as ArrayBuffer);
+    const array = new Uint8Array(doc as ArrayBuffer);
+    this.doc.import(array);
+    server.send(this.doc.export({ mode: "snapshot" }));
     return new Response(null, { status: 101, webSocket: client });
   }
 
