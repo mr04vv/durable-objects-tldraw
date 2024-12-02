@@ -1,10 +1,11 @@
 #:schema node_modules/wrangler/config-schema.json
 name = "server"
+main = "src/index.ts"
 compatibility_date = "2024-11-27"
 compatibility_flags = ["nodejs_compat"]
 
 [durable_objects]
-bindings = [{name = "DOC", class_name = "Doc"}]
+bindings = [{name = "COUNTER", class_name = "Counter"}]
 
 [[migrations]]
 tag = "v1" # Should be unique for each entry

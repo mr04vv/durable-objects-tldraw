@@ -26,11 +26,12 @@ type Props = {
 
 export const LoroProvider = ({ children }: Props) => {
   const doc = useMemo(() => new LoroDoc(), []);
+  const roomId = location.pathname.split("/")[1] || "room";
   const userName =
     new URLSearchParams(location.search).get("userName") || "name";
   const wsProvider = useMemo(() => {
-    return new WebSocket("ws://localhost:8787/ws/hoge");
-  }, []);
+    return new WebSocket(`https://server.mooriii.workers.dev/ws/${roomId}`);
+  }, [roomId]);
 
   wsProvider.binaryType = "arraybuffer";
 

@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "wrangler pages dev",
+    "deploy": "vite build && wrangler pages deploy",
+    "lint": "eslint ."
   },
   "dependencies": {
     "framer-motion": "11.12.0",
@@ -29,6 +30,7 @@
     "typescript-eslint": "^8.15.0",
     "vite": "^6.0.1",
     "vite-plugin-top-level-await": "1.4.4",
-    "vite-plugin-wasm": "3.3.0"
+    "vite-plugin-wasm": "3.3.0",
+    "wrangler": "3.60.3"
   }
 }
