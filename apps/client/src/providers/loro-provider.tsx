@@ -1,4 +1,4 @@
-import { LoroDoc } from "loro-crdt";
+import { Awareness, LoroDoc } from "loro-crdt";
 import { useEffect, useMemo } from "react";
 import { createContextWrapper } from "../create-context-wrapper";
 
@@ -15,6 +15,7 @@ type LoroContextType = {
   doc: LoroDoc;
   wsProvider: WebSocket;
   userName: string;
+  awareness: Awareness<AwarenessState>;
 };
 const [useLoro, LoroContext] = createContextWrapper<LoroContextType>();
 // eslint-disable-next-line react-refresh/only-export-components
@@ -32,13 +33,29 @@ export const LoroProvider = ({ children }: Props) => {
   }, []);
 
   wsProvider.binaryType = "arraybuffer";
+
+  const awareness = useMemo(
+    () => new Awareness<AwarenessState>(doc.peerIdStr),
+    [doc.peerIdStr],
+  );
   useEffect(() => {
     wsProvider.onerror = (err) => {
       console.log(err);
     };
   }, [wsProvider]);
+
+  useEffect(() => {
+    awareness.addListener((_, origin) => {
+      if (origin !== "local") return;
+      const encoded = awareness.encode(awareness.peers());
+      const messageType = 1;
+      // messageTypeを先頭に付けてencodedを送信
+      const message = new Uint8Array([messageType, ...encoded]);
+      wsProvider.send(message);
+    });
+  }, [awareness, wsProvider]);
   return (
-    <LoroContext.Provider value={{ doc, wsProvider, userName }}>
+    <LoroContext.Provider value={{ doc, wsProvider, userName, awareness }}>
       {children}
     </LoroContext.Provider>
   );

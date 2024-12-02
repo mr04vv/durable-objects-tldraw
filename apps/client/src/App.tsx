@@ -1,22 +1,25 @@
-import { LoroDoc, type LoroEventBatch, type VersionVector } from "loro-crdt";
+import type { LoroEventBatch, VersionVector } from "loro-crdt";
 import { useCallback, useEffect, useRef } from "react";
 import { type TLRecord, type TLShape, type TLShapeId, useEditor } from "tldraw";
 import "tldraw/tldraw.css";
 import { useCrdt } from "./hooks/use-crdt";
 import { useLoro } from "./providers/loro-provider";
-const doc2 = new LoroDoc();
 
 function App() {
   const editor = useEditor();
   const { updateMap, removeFromMap } = useCrdt();
-  const { doc, wsProvider } = useLoro();
+  const { doc, wsProvider, awareness } = useLoro();
   const versionRef = useRef<VersionVector>(doc.version());
 
   const includeAssetOrShapeString = useCallback((str: string) => {
-    return str.includes("asset") || str.includes("shape");
+    return (
+      str.includes("asset") || str.includes("shape") || str.includes("binding")
+    );
   }, []);
   const isAssetOrShape = useCallback((typeName: string) => {
-    return typeName === "asset" || typeName === "shape";
+    return (
+      typeName === "asset" || typeName === "shape" || typeName === "binding"
+    );
   }, []);
 
   const handleAddedObject = useCallback(
@@ -78,7 +81,8 @@ function App() {
           mode: "update",
           from: versionRef.current,
         });
-        const message = new Uint8Array(updated);
+        const messageType = 0;
+        const message = new Uint8Array([messageType, ...updated]);
         wsProvider.send(message);
         versionRef.current = doc.version();
       }
@@ -131,13 +135,19 @@ function App() {
       try {
         const data = ev.data;
         const arrayMessage = new Uint8Array(data);
-        doc.import(arrayMessage);
+        const message = arrayMessage.slice(1);
+        if (arrayMessage[0] === 1) {
+          awareness.apply(new Uint8Array(message as ArrayBuffer));
+          return;
+        }
+        const bytes = new Uint8Array(message as ArrayBuffer);
+        doc.import(bytes);
         versionRef.current = doc.version();
       } catch (err) {
         console.error(err);
       }
     },
-    [doc],
+    [awareness, doc],
   );
 
   useEffect(() => {
@@ -151,6 +161,25 @@ function App() {
     doc.getMap("map").subscribe(handleMapUpdate);
   }, [doc, handleMapUpdate]);
 
+  useEffect(() => {
+    const handleMouseEvent = (e: MouseEvent) => {
+      const pagePosition = editor.screenToPage({ x: e.clientX, y: e.clientY });
+      awareness.setLocalState({
+        position: {
+          x: pagePosition.x,
+          y: pagePosition.y,
+          z: editor.getCamera().z,
+        },
+        userId: doc.peerIdStr,
+        userName: `user:${doc.peerIdStr.slice(0, 3)}`,
+      });
+    };
+
+    window.addEventListener("mousemove", handleMouseEvent);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseEvent);
+    };
+  }, [awareness, doc.peerIdStr, editor]);
   return <></>;
 }
 

@@ -29,9 +29,13 @@ app.get(
         if (!ws.raw) return;
         if (!(ws.raw instanceof WebSocket)) return;
         const update = message.data as ArrayBuffer;
-        ws.raw.binaryType = "arraybuffer";
+        const isAwareness = new Uint8Array(update)[0] === 1;
         for (const conn of conns) {
           if (conn === ws.raw) continue;
+          if (isAwareness) {
+            conn.send(update);
+            continue;
+          }
           conn.send(update);
         }
       },
