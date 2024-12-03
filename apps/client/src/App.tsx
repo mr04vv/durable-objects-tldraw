@@ -228,8 +228,12 @@ function App() {
     <input
       style={{
         position: "fixed",
-        top: 10,
-        left: 180,
+        bottom: window.innerWidth < 840 ? 100 : 65,
+        // 中央に配置
+        margin: "auto",
+        width: 200,
+        left: 0,
+        right: 0,
       }}
       onChange={(e) => {
         setName(e.target.value.trim() || `user:${doc.peerIdStr.slice(0, 3)}`);
@@ -238,7 +242,7 @@ function App() {
           e.target.value.trim() || `user:${doc.peerIdStr.slice(0, 3)}`,
         );
       }}
-      placeholder="enter name"
+      placeholder="Enter cursor name"
     />
   );
 }
