@@ -1,5 +1,5 @@
 import type { LoroEventBatch, VersionVector } from "loro-crdt";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { type TLRecord, type TLShape, type TLShapeId, useEditor } from "tldraw";
 import "tldraw/tldraw.css";
 import { useCrdt } from "./hooks/use-crdt";
@@ -13,6 +13,10 @@ function App() {
   const { updateMap, removeFromMap } = useCrdt();
   const { doc, wsProvider, awareness } = useLoro();
   const versionRef = useRef<VersionVector>(doc.version());
+  const defaultName = localStorage.getItem("userName");
+  const [name, setName] = useState<string>(
+    defaultName || `user:${doc.peerIdStr.slice(0, 3)}`,
+  );
 
   const includeAssetOrShapeString = useCallback((str: string) => {
     return (
@@ -204,7 +208,7 @@ function App() {
           z: editor.getCamera().z,
         },
         userId: doc.peerIdStr,
-        userName: `user:${doc.peerIdStr.slice(0, 3)}`,
+        userName: name,
       });
     },
     { wait: THROTTLE_INTERVAL },
@@ -220,7 +224,23 @@ function App() {
       window.removeEventListener("mousemove", handleMouseEvent);
     };
   }, [throttledCursorChange]);
-  return <></>;
+  return (
+    <input
+      style={{
+        position: "fixed",
+        top: 10,
+        left: 180,
+      }}
+      onChange={(e) => {
+        setName(e.target.value.trim() || `user:${doc.peerIdStr.slice(0, 3)}`);
+        localStorage.setItem(
+          "userName",
+          e.target.value.trim() || `user:${doc.peerIdStr.slice(0, 3)}`,
+        );
+      }}
+      placeholder="enter name"
+    />
+  );
 }
 
 export default App;

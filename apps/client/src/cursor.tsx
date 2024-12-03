@@ -85,8 +85,7 @@ const Pointer = (props: Props) => {
         backgroundColor: "blue",
         color: "white",
         borderRadius: 40,
-        padding: 8,
-        width: 100,
+        padding: 20,
         height: 40,
         display: "flex",
         justifyContent: "center",
@@ -102,7 +101,7 @@ const Pointer = (props: Props) => {
       }}
       key={props.userId}
     >
-      {props.userName}
+      <p style={{ whiteSpace: "nowrap" }}>{props.userName}</p>
     </motion.div>
   );
 };
