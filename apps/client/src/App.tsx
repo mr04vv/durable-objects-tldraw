@@ -4,6 +4,9 @@ import { type TLRecord, type TLShape, type TLShapeId, useEditor } from "tldraw";
 import "tldraw/tldraw.css";
 import { useCrdt } from "./hooks/use-crdt";
 import { useLoro } from "./providers/loro-provider";
+import { useThrottleFn } from "ahooks";
+
+const THROTTLE_INTERVAL = 120;
 
 function App() {
   const editor = useEditor();
@@ -112,22 +115,52 @@ function App() {
     [doc, editor.store, wsProvider],
   );
 
+  // updateの処理は高頻度で起こるので一定間隔で処理する
+  const { run: throttledUpdate } = useThrottleFn(
+    (updated: Record<string, [from: TLRecord, to: TLRecord]>) => {
+      handleUpdatedObject(updated);
+    },
+    { wait: THROTTLE_INTERVAL },
+  );
+
   useEffect(() => {
     const listen = editor.store.listen((e) => {
       const { changes, source } = e;
       if (source !== "user") return;
       const { added, removed, updated } = changes;
+      const addedObjKey = Object.keys(added);
+      const addedObj = Object.values(added);
+      const updatedObjKey = Object.keys(updated);
+      const updatedObj = Object.values(updated);
+      const removedObj = Object.values(removed);
 
-      handleAddedObject(added);
-      handleUpdatedObject(updated);
-      handleRemovedObject(removed);
+      if (addedObj.length) {
+        const includeShape = addedObjKey.some((key) =>
+          includeAssetOrShapeString(key),
+        );
+        if (includeShape) {
+          handleAddedObject(added);
+        }
+      }
+
+      if (updatedObj.length) {
+        const includeShape = updatedObjKey.some((key) =>
+          includeAssetOrShapeString(key),
+        );
+        if (includeShape) {
+          throttledUpdate(updated);
+        }
+      }
+
+      if (removedObj.length) handleRemovedObject(removed);
     });
     return listen;
   }, [
     editor.store,
     handleAddedObject,
     handleRemovedObject,
-    handleUpdatedObject,
+    includeAssetOrShapeString,
+    throttledUpdate,
   ]);
 
   const handleWsMessage = useCallback(
@@ -160,8 +193,9 @@ function App() {
     doc.getMap("map").subscribe(handleMapUpdate);
   }, [doc, handleMapUpdate]);
 
-  useEffect(() => {
-    const handleMouseEvent = (e: MouseEvent) => {
+  // カーソルの移動は高頻度で起こるので一定間隔で処理する
+  const { run: throttledCursorChange } = useThrottleFn(
+    (e: MouseEvent) => {
       const pagePosition = editor.screenToPage({ x: e.clientX, y: e.clientY });
       awareness.setLocalState({
         position: {
@@ -172,13 +206,20 @@ function App() {
         userId: doc.peerIdStr,
         userName: `user:${doc.peerIdStr.slice(0, 3)}`,
       });
+    },
+    { wait: THROTTLE_INTERVAL },
+  );
+
+  useEffect(() => {
+    const handleMouseEvent = (e: MouseEvent) => {
+      throttledCursorChange(e);
     };
 
     window.addEventListener("mousemove", handleMouseEvent);
     return () => {
       window.removeEventListener("mousemove", handleMouseEvent);
     };
-  }, [awareness, doc.peerIdStr, editor]);
+  }, [throttledCursorChange]);
   return <></>;
 }
 

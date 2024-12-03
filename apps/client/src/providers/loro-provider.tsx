@@ -29,9 +29,14 @@ export const LoroProvider = ({ children }: Props) => {
   const roomId = location.pathname.split("/")[1] || "room";
   const userName =
     new URLSearchParams(location.search).get("userName") || "name";
+  const wsUrl = useMemo(
+    () =>
+      import.meta.env.DEV ? "ws://localhost:8787" : import.meta.env.VITE_WS_URL,
+    [],
+  );
   const wsProvider = useMemo(() => {
-    return new WebSocket(`https://server.mooriii.workers.dev/ws/${roomId}`);
-  }, [roomId]);
+    return new WebSocket(`${wsUrl}/ws/${roomId}`);
+  }, [roomId, wsUrl]);
 
   wsProvider.binaryType = "arraybuffer";
 
