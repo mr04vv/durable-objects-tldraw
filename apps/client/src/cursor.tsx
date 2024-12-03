@@ -73,6 +73,14 @@ const Pointer = (props: Props) => {
   return (
     <motion.div
       ref={rDiv}
+      transition={{
+        type: "spring",
+        damping: 60,
+        mass: 2,
+        stiffness: 400,
+      }}
+      initial={{ x: props.position.x, y: props.position.y }}
+      animate={{ x: props.position.x, y: props.position.y }}
       style={{
         backgroundColor: "blue",
         color: "white",
